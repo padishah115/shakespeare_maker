@@ -40,7 +40,7 @@ class NGram:
         # Train on the specified number of lines in the file
         for line in lines[:self.training_window]:
             splitline = list(line.split(" ")) # introduce special '£' character for linebreak
-            words = ['+' + word + '+' for word in splitline if word != ''] + ["£"] # introduce '+' character for space
+            words = ['+' + word for word in splitline if word != ''] + ["£"] # introduce '+' character for space
             for word in words:
                 chars += ([char for char in word])
 
@@ -63,7 +63,7 @@ class NGram:
 
         
 
-    def _set_probmatrix(self, smoothing:float=0.1):
+    def _set_probmatrix(self, smoothing:float=1e-4):
         """Sets the matrix of probabilities, i.e. how likely one character is to follow another.
         
         Parameters
@@ -72,11 +72,14 @@ class NGram:
                 Value to be added to all cells in the matrix so that no probability is encoded at 0.
         """
 
-        self.N = torch.zeros((len(self.vocabulary), len(self.vocabulary)))
-        for word1, word2 in zip(self.chars, self.chars[1:]):
-            ix1 = self.stoi[word1]
-            ix2 = self.stoi[word2]
-            self.N[ix1][ix2] += 1
+        dimensions = [len(self.vocabulary) for _ in range(self.context)]
+        self.N = torch.zeros((dimensions))
+        char_slices = [self.chars[i:] for i in range(self.context)] # for creating a zip file
+
+        zipped_chars = zip(*char_slices) # each tuple (row) is an n-gram 
+        for chars in zipped_chars:
+            ixs = [self.stoi[char] for char in chars]
+            self.N[tuple(ixs)] += 1
 
         # Smoothing
         self.N += smoothing * torch.ones_like(self.N)
@@ -100,19 +103,21 @@ class NGram:
         generated_lines = []
 
         # Turn each row into a probability distribution, from which we will sample.
-        probs = self.N / self.N.sum(1, keepdim=True)
+        prob = self.N / self.N.sum(-1, keepdim=True)
 
         generator = torch.Generator().manual_seed(seed)
         
         i = 0
-        ix = torch.tensor(self.stoi['+']) # Begin at start character '+'
+        context = [self.stoi['£']]*(self.context-1) # Begin at start character '£'
         for i in range(lines_to_gen):
             new_line = False
             line = []
-            
             while not new_line:
-                ix = torch.multinomial(probs[ix.item()], generator=generator, num_samples=1)
-                
+
+                prob_row = prob[tuple(context)]
+                ix = torch.multinomial(prob_row, generator=generator, num_samples=1)
+                context = context[1:] + [ix.item()]
+
                 # if the next character is a space, append a space
                 if ix.item() == self.stoi["+"]:
                     next_char = ' '
