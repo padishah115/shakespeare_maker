@@ -12,7 +12,7 @@ def main(path: str | os.PathLike = "shakespeare.txt"):
         print("\n")
         print(f"{i}-GRAM MODEL")
         print("------")
-        bigram = NGram(fname=path, context=i)
+        bigram = NGram(fpath=path, context=i)
         bigram.generate_text(lines_to_gen=10)
         print("\n")
         print("------")
