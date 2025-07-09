@@ -3,13 +3,33 @@ import torch
 
 
 class NGram:
-    """Class for n-gram language model."""
+    """Class for n-gram language model.
+    
+    Attributes
+    ----------
+        fname : str | os.PathLike
+            Path to the file containing training data.
+        context : int
+            Length of the context window as an integer. I.e. context=2 is a bigram model.
+        training_window : int
+            Number of lines from the training data file which will be passed to the model for training.
+        chars : list[str]
+            List of characters extracted from the training window.
+        vocabulary : list[str]
+            Sorted list of all characters that the model has detected in the training data.
+        stoi : dict[str : int]
+            Mapping from characters as strings to their corresponding index in the vocabulary (an integer).
+        itos : dict[int : str]
+            Mapping from a character's index (inter) to the character itself (string).
+        N : torch.Tensor
+            Multidimensional tensor which encodes the probabilities of one character following characters in a context window.
+    """
 
-    def __init__(self, fname: str | os.PathLike, context:int, training_window:int=10000):
+    def __init__(self, fpath: str | os.PathLike, context:int, training_window:int=10000):
         """
         Parameters
         ----------
-            fname : str | os.PathLike
+            fpath : str | os.PathLike
                 Name of the file containing the text from which the model will learn.
             context : int
                 Size of context window (i.e. context=2 is bigram, context=3 is trigram, etc.)
@@ -18,7 +38,7 @@ class NGram:
 
         """
 
-        self.fname = fname
+        self.fpath = fpath
         self.context = context
         self.training_window = training_window
 
@@ -51,7 +71,7 @@ class NGram:
         """Generates a vocabulary for the class composed of all characters in the text, and generates both string-to-index and index-to-string
         mapping dictionaries, where the index is unique for each character in the vocabulary."""
         
-        lines = open(self.fname).read().splitlines()
+        lines = open(self.fpath).read().splitlines()
 
         # Get character list
         self.chars = self._get_chars(lines=lines)
