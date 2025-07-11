@@ -7,6 +7,7 @@ from models.embedding import EmbeddingModel
 def main(path: str | os.PathLike = "shakespeare.txt"):
     
     path = path
+    context = 10
 
     # # 4- and 5-gram model
     # for i in range(4, 6):
@@ -19,13 +20,13 @@ def main(path: str | os.PathLike = "shakespeare.txt"):
     #     print("------")
 
     # Vector embedding models
-    for i in range(9, 11):
+    for i in range(9, 10):
         print("\n")
         print(f"EMBEDDING MODEL, {i} FEATURES")
         print("------")
-        embedding_model = EmbeddingModel(fpath=path, context=3, feature_no=i)
-        embedding_model.generate_text(lines_to_gen=10, n_epochs=1000)
-        embedding_model.save_model(f"./trained-models-statedicts/{i}-feature_embedding_model.pt")
+        embedding_model = EmbeddingModel(fpath=path, context=context, feature_no=i)
+        embedding_model.generate_text(lines_to_gen=10, n_epochs=2000)
+        embedding_model.save_model(f"./trained-models-statedicts/{i}-feature_embedding_model_context_{context}.pt")
         print("\n")
         print("------")
         

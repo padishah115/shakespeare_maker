@@ -105,7 +105,8 @@ class EmbeddingModel(nn.Module):
 
         # Initialise model architecture
         self.embedding_matrix = nn.Embedding(num_embeddings=len(self.vocabulary), embedding_dim=self.feature_no)
-        self.fc = nn.Linear(in_features=self.context*self.feature_no, out_features=len(self.vocabulary))
+        self.fc1 = nn.Linear(in_features=self.context*self.feature_no, out_features=400)
+        self.fc2 = nn.Linear(in_features=400, out_features=len(self.vocabulary))
         self.activation = torch.tanh
 
         # Initialise random embedding matrix of size V x feature_no
@@ -121,17 +122,21 @@ class EmbeddingModel(nn.Module):
     def _forward_pass(self, X:torch.Tensor)->torch.Tensor:
         """Network forwards pass.
         
-        Returns 
+        Parameters 
         -------
             X : torch.Tensor
-            outputs : torch.Tensor
-                Neural network outputs, in tensor form.
+
+        Returns
+        -------
+            out : torch.Tensor
+                Neural network outputs, in tensor form. These correspond to logits across all members of the vocabulary.
         """
         
         inputs = self.embedding_matrix(X)
         inputs = inputs.view(-1, self.context*self.feature_no)
-        out = self.fc(inputs)
+        out = self.fc1(inputs)
         out = self.activation(out)
+        out = self.fc2(out)
 
         return out
 
@@ -179,7 +184,7 @@ class EmbeddingModel(nn.Module):
             loss = self._backward_pass(outputs, targets)
             
             if epoch % 10 == 0 or epoch == 1:
-                print(f"Loss at epoch {epoch}:", loss)
+                print(f"Loss at epoch {epoch}: {loss:.4f}")
 
         print("Concluded training.")
 
