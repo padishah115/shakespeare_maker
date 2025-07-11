@@ -4,10 +4,10 @@ import os
 from models.ngram import NGram
 from models.embedding import EmbeddingModel
 
-def main(path: str | os.PathLike = "shakespeare.txt"):
+def main(path: str | os.PathLike = "./training-data/shakespeare.txt"):
     
     path = path
-    context = 10
+    
 
     # # 4- and 5-gram model
     # for i in range(4, 6):
@@ -20,15 +20,17 @@ def main(path: str | os.PathLike = "shakespeare.txt"):
     #     print("------")
 
     # Vector embedding models
-    for i in range(9, 10):
-        print("\n")
-        print(f"EMBEDDING MODEL, {i} FEATURES")
-        print("------")
-        embedding_model = EmbeddingModel(fpath=path, context=context, feature_no=i)
-        embedding_model.generate_text(lines_to_gen=10, n_epochs=2000)
-        embedding_model.save_model(f"./trained-models-statedicts/{i}-feature_embedding_model_context_{context}.pt")
-        print("\n")
-        print("------")
+    context = 15    
+    features = 15
+
+    print("\n")
+    print(f"EMBEDDING MODEL, {features} FEATURES, CONTEXT WINDOW: {context}")
+    print("------")
+    embedding_model = EmbeddingModel(fpath=path, context=context, feature_no=features)
+    embedding_model.generate_text(lines_to_gen=10, n_epochs=2000)
+    embedding_model.save_model(f"./trained-models-statedicts/{features}-feature_embedding_model_context_{context}.pt")
+    print("\n")
+    print("------")
         
     
 

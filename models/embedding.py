@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+import pandas as pd
 import time
 
 
@@ -177,16 +178,32 @@ class EmbeddingModel(nn.Module):
             n_epochs : int
                 Number of epochs over which we train the model.
         """
-
+        epochs = []
+        losses = []
+        times = []
         for epoch in range(1, n_epochs+1):
+            ti = time.time() #time length of each epoch
             outputs = self._forward_pass(X=X)
             targets = Y
             loss = self._backward_pass(outputs, targets)
+            tf=time.time() # time length of each epoch
+            dt = tf-ti
             
-            if epoch % 10 == 0 or epoch == 1:
+            if epoch % 500 == 0 or epoch == 1:
                 print(f"Loss at epoch {epoch}: {loss:.4f}")
+            
+            # Append epoch number and loss for analysis
+            epochs.append(epoch)
+            losses.append(loss)
+            times.append(dt)
 
-        print("Concluded training.")
+        # Save loss statistics
+        loss_data = {"Epoch":epochs, "Loss":losses, "Time":times}
+        loss_df = pd.DataFrame(loss_data)
+        loss_df.to_csv(f"./loss-stats/{self.feature_no}-feature_embedding_model_context_{self.context}.csv")
+
+        print("<Concluded training>.")
+        print("------")
 
 
     def _get_generated_lines(self, lines_to_gen:int, seed:int=42)->list[str]:
