@@ -20,18 +20,19 @@ def main(path: str | os.PathLike = "./training-data/shakespeare.txt"):
     #     print("------")
 
     # Vector embedding models
-    context = 15    
-    features = 10
 
-    print("\n")
-    print(f"EMBEDDING MODEL, {features} FEATURES, CONTEXT WINDOW: {context}")
-    print("------")
-    embedding_model = EmbeddingModel(fpath=path, context=context, feature_no=features)
-    embedding_model.generate_text(lines_to_gen=10, n_epochs=2000)
-    embedding_model.save_text(f"./generated-text/{features}-feature-{context}-context.txt")
-    embedding_model.save_model(f"./trained-models-statedicts/{features}-feature_embedding_model_context_{context}.pt")
-    print("\n")
-    print("------")
+    features = 5
+
+    for context in [5, 10, 15]:
+        print("\n")
+        print(f"EMBEDDING MODEL, {features} FEATURES, CONTEXT WINDOW: {context}")
+        print("------")
+        embedding_model = EmbeddingModel(fpath=path, context=context, feature_no=features)
+        embedding_model.generate_text(lines_to_gen=10, n_epochs=2000)
+        embedding_model.save_text(f"./generated-text/{features}-feature-{context}-context.txt")
+        embedding_model.save_model(f"./trained-models-statedicts/{features}-feature_embedding_model_context_{context}.pt")
+        print("\n")
+        print("------")
         
     
 
