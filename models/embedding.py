@@ -10,13 +10,15 @@ import time
 class EmbeddingModel(nn.Module):
     """More advanced model which uses embedding of letters in order to generate more sophisticated predictions."""
 
-    def __init__(self, fpath: str | os.PathLike, context:int, feature_no:int=3, training_window:int=10000):
+    def __init__(self, fpath: str | os.PathLike, chars:list[str], context:int, feature_no:int=3, training_window:int=10000):
         """Initialisation function for model using embedding.
         
         Parameters
         ----------
             fpath : str | os.PathLike
                 The path to the file containing training data for the model.
+            chars : list[str]
+                List of characters which appear in the training data.
             context : int   
                 Size of the context window for predictions, as an integer.
             feature_no : int
@@ -28,44 +30,15 @@ class EmbeddingModel(nn.Module):
         super().__init__()
 
         self.fpath = fpath
+        self.chars = chars
         self.context = context
         self.feature_no = feature_no
         self.training_window = training_window
-
-
-    def _get_chars(self, lines:list[str])->list[str]:
-        """Produces list of characters from a given list of lines.
-        
-        Parameters
-        ----------
-            lines : list[str]
-                List of lines in the text document as strings.
-
-        Returns
-        -------
-            chars : list[str]
-        """
-
-        chars = []
-
-        # Train on the specified number of lines in the file
-        for line in lines[:self.training_window]:
-            splitline = list(line.split(" ")) # introduce special '£' character for linebreak
-            words = ['+' + word for word in splitline if word != ''] + ["£"] # introduce '+' character for space
-            for word in words:
-                chars += ([char for char in word])
-
-        return chars
     
 
     def _set_mapping(self, ):
         """Generates a vocabulary for the class composed of all characters in the text, and generates both string-to-index and index-to-string
         mapping dictionaries, where the index is unique for each character in the vocabulary."""
-        
-        lines = open(self.fpath).read().splitlines()
-
-        # Get character list
-        self.chars = self._get_chars(lines=lines)
 
         # Generate mapping dictionaries
         self.vocabulary = sorted(set(self.chars))
@@ -110,9 +83,6 @@ class EmbeddingModel(nn.Module):
         self.fc2 = nn.Linear(in_features=400, out_features=len(self.vocabulary))
         self.activation = torch.tanh
 
-        # Initialise random embedding matrix of size V x feature_no
-        V = len(self.vocabulary) # size of vocabulary
-
 
     def _initialise_optimizer(self, ):
         """Initialises the Adam optimizer using the model's parameters."""
@@ -120,7 +90,7 @@ class EmbeddingModel(nn.Module):
         self.optimizer = optim.Adam(self.parameters())
 
 
-    def _forward_pass(self, X:torch.Tensor)->torch.Tensor:
+    def forward(self, X:torch.Tensor)->torch.Tensor:
         """Network forwards pass.
         
         Parameters 
@@ -183,7 +153,7 @@ class EmbeddingModel(nn.Module):
         times = []
         for epoch in range(1, n_epochs+1):
             ti = time.time() #time length of each epoch
-            outputs = self._forward_pass(X=X)
+            outputs = self.forward(X=X)
             targets = Y
             loss = self._backward_pass(outputs, targets)
             tf=time.time() # time length of each epoch
