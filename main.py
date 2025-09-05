@@ -40,38 +40,25 @@ def main(path: str | os.PathLike = "./training-data/shakespeare.txt"):
     # N-Grams of various sizes #
     ############################
 
-    # ngram_sizes = [3, 4, 5]
-    # for n in ngram_sizes:
-    #     train_ngram(
-    #         fpath=path,
-    #         context=n
-    #     )
+    ngram_sizes = [3, 4, 5]
+    for n in ngram_sizes:
+        train_ngram(
+            fpath=path,
+            context=n
+        )
 
     ###########################
     # Vector embedding models #
     ###########################
 
-    # features = [5, 10, 15] # dimensions of embedding space
-    # context = [5, 10, 15] # size of context window
-
-    # for f in features:
-    #     for c in context:
-    #         train_embedding(
-    #             fpath=path,
-    #             model_type="EMBEDDING",
-    #             chars=chars,
-    #             features=f,
-    #             context=c
-    #         )
-
-    features = [64, 128, 256] # dimensions of embedding space
+    features = [5, 10, 15] # dimensions of embedding space
     context = [5, 10, 15] # size of context window
 
     for f in features:
         for c in context:
             train_embedding(
                 fpath=path,
-                model_type="TRANSFORMER",
+                model_type="EMBEDDING",
                 chars=chars,
                 features=f,
                 context=c

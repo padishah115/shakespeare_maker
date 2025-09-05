@@ -1,6 +1,5 @@
 import os
 from models.embedding import EmbeddingModel
-from models.transformer import TransformerModel
 
 
 def train_embedding(fpath:str | os.PathLike,
@@ -36,7 +35,7 @@ def train_embedding(fpath:str | os.PathLike,
             The path at which the model's state dictionary will be saved.
     """
 
-    model_map = {"EMBEDDING":EmbeddingModel, "TRANSFORMER":TransformerModel}
+    model_map = {"EMBEDDING":EmbeddingModel,}
 
     print("\n")
     print(f"EMBEDDING MODEL, {features} FEATURES, CONTEXT WINDOW: {context}")
